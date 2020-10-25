@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
 const mysql = require("mysql");
+const cTable = require("console.table");
 
 //starts prompt for number of team members
 //starts main prompt for team member
