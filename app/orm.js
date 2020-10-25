@@ -33,21 +33,32 @@ const db = new Database({
 
 function getEmployee(employeeId) {
   const sql = `SELECT * FROM employee ` + (employeeId ? `WHERE id = ?` : "");
-  console.log("Got Quotes? QOUTE ID", employeeId);
+  // console.log(db.query(sql, [employeeId]));
   return db.query(sql, [employeeId]);
 }
 
-function saveQuote(author, quote) {
-  const sql = `INSERT INTO quotes (quote, author) VALUES (?, ?)
-  `;
-  console.log("Saved Quote!");
-  return db.query(sql, [author, quote]);
+function getDepartments() {
+  const sql = `SELECT * FROM department `;
+  // console.log("Saved Quote!");
+  return db.query(sql);
 }
 
-function updateQuote(id, quoteData) {
-  const sql = `UPDATE quotes SET quote = ? WHERE id = ?`;
-  console.log("Updated Quote!");
-  return db.query(sql, [quoteData, id]);
+function getEmployeeByDepartment(id) {
+  const sql = `SELECT * FROM employee WHERE id=?`;
+  // console.log("Updated Quote!");
+  return db.query(sql, [id]);
+}
+
+function getManager() {
+  const sql = `SELECT * FROM employee WHERE role_id="1" `;
+  console.log("Received Data: ", sql);
+  return db.query(sql);
+}
+
+function getEmployeeByManager(id) {
+  const sql = `SELECT * FROM employee WHERE manager_id=?`;
+  // console.log("Updated Quote!");
+  return db.query(sql, [id]);
 }
 
 function deleteQuote(quoteId) {
@@ -60,4 +71,12 @@ function closeORM() {
   return db.close();
 }
 
-module.exports = { getEmployee, saveQuote, deleteQuote, updateQuote, closeORM };
+module.exports = {
+  getEmployee,
+  getDepartments,
+  deleteQuote,
+  getEmployeeByDepartment,
+  getManager,
+  getEmployeeByManager,
+  closeORM,
+};
