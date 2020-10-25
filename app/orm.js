@@ -31,10 +31,10 @@ const db = new Database({
   database: "employee_db",
 });
 
-function getQuotes(quoteId = "") {
-  const sql = `SELECT * FROM quotes ` + (quoteId ? `WHERE id = ?` : "");
-  console.log("Got Quotes? QOUTE ID", quoteId);
-  return db.query(sql, [quoteId]);
+function getEmployee(employeeId) {
+  const sql = `SELECT * FROM employee ` + (employeeId ? `WHERE id = ?` : "");
+  console.log("Got Quotes? QOUTE ID", employeeId);
+  return db.query(sql, [employeeId]);
 }
 
 function saveQuote(author, quote) {
@@ -60,4 +60,4 @@ function closeORM() {
   return db.close();
 }
 
-module.exports = { getQuotes, saveQuote, deleteQuote, updateQuote, closeORM };
+module.exports = { getEmployee, saveQuote, deleteQuote, updateQuote, closeORM };

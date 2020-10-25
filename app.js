@@ -3,39 +3,44 @@ const path = require("path");
 const fs = require("fs");
 const mysql = require("mysql");
 const cTable = require("console.table");
-
+const orm = require("./app/orm");
 //starts prompt for number of team members
 //starts main prompt for team member
-function promptUser() {
+
+function initialPrompt() {
   return inquirer.prompt([
     {
-      type: "input",
-      message: "What is their name?",
-      name: "name",
-    },
-    {
-      type: "input",
-      message: "What is their ID number?",
-      name: "id",
-    },
-    {
-      type: "input",
-      message: "What is their email?",
-      name: "email",
-    },
-    {
       type: "checkbox",
-      message: "What is their role?",
-      choices: ["Engineer", "Intern"],
-      name: "role",
+      message: "What would you like to do?",
+      name: "initResponse",
+      choices: [
+        "View all employees",
+        "View employee by department",
+        "View employee by manager",
+        "Add employee",
+        "Remove employee",
+        "Update employee role",
+        "Update employee manager",
+        "View all roles",
+        "Add role",
+        "Remove role",
+        "View all managers",
+        "Add manager",
+        "Remove manager",
+      ],
     },
   ]);
 }
+
 //specific prompt for engineer
 //starts prompts and uses await to wait for response
 async function initialize() {
   try {
-    const managerResponse = await promptManager();
+    const initResp = await initialPrompt();
+    if (initResp.initResponse === "View all employees") {
+      console.log("BANG");
+      orm.getEmployee();
+    }
   } catch (error) {
     console.log(error);
   }
