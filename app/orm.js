@@ -38,7 +38,7 @@ function getEmployee(employeeId) {
 }
 
 function getDepartments() {
-  const sql = `SELECT * FROM department `;
+  const sql = `SELECT * FROM department`;
   // console.log("Saved Quote!");
   return db.query(sql);
 }
@@ -50,8 +50,8 @@ function getEmployeeByDepartment(id) {
 }
 
 function getManager() {
-  const sql = `SELECT * FROM employee WHERE role_id="1" `;
-  console.log("Received Data: ", sql);
+  const sql = `SELECT * FROM employee WHERE role_id="4"`;
+  // console.log("Received Data: ", sql);
   return db.query(sql);
 }
 
@@ -61,10 +61,30 @@ function getEmployeeByManager(id) {
   return db.query(sql, [id]);
 }
 
-function deleteQuote(quoteId) {
-  const sql = `DELETE FROM quotes WHERE id=?`;
-  console.log("Deleted quote!");
-  return db.query(sql, [quoteId]);
+function getManagerId(firstName) {
+  // console.log("GOT MANAGER ID", firstName);
+
+  const sql = `SELECT * FROM employee WHERE first_name=?`;
+  return db.query(sql, [firstName]);
+}
+
+function getDepartmentId(role) {
+  // console.log("GOT DEPARTMENT ID", role);
+
+  const sql = `SELECT * FROM emprole WHERE title=?`;
+  return db.query(sql, [role]);
+}
+
+function addEmployee(firstName, lastName, role, manager) {
+  const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+  // console.log("ADDED EMPLOYEE");
+  return db.query(sql, [firstName, lastName, role, manager]);
+}
+
+function deleteEmployee(employeeId) {
+  const sql = `DELETE FROM employee WHERE id=?`;
+  console.log("Deleted Employee!");
+  return db.query(sql, [employeeId]);
 }
 
 function closeORM() {
@@ -74,9 +94,12 @@ function closeORM() {
 module.exports = {
   getEmployee,
   getDepartments,
-  deleteQuote,
+  deleteEmployee,
   getEmployeeByDepartment,
   getManager,
   getEmployeeByManager,
+  addEmployee,
+  getManagerId,
+  getDepartmentId,
   closeORM,
 };
