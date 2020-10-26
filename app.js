@@ -28,8 +28,6 @@ function initialPrompt() {
         "Add role",
         "Remove role",
         "View all managers",
-        "Add manager",
-        "Remove manager",
       ],
     },
   ]);
@@ -169,6 +167,7 @@ function removeEmployeePrompt2(employee) {
 async function initialize() {
   try {
     const initResp = await initialPrompt();
+    // View all
     if (initResp.initResponse == "View all employees") {
       const data = orm.getEmployee();
       data.then(function (result) {
@@ -176,13 +175,19 @@ async function initialize() {
         console.table(result);
       });
       initialize();
-    } else if (initResp.initResponse == "View employee by department") {
+    }
+    // View by departmnet
+    else if (initResp.initResponse == "View employee by department") {
       const getDep = await getDepartments();
       // console.log("DEPARTMENT PROMPT RESULT: ", depRes);
-    } else if (initResp.initResponse == "View employee by manager") {
+    }
+    // View by manager
+    else if (initResp.initResponse == "View employee by manager") {
       const getDep = await getManager();
       // console.log("DEPARTMENT PROMPT RESULT: ", manRes);
-    } else if (initResp.initResponse == "Add employee") {
+    }
+    // Add Employee
+    else if (initResp.initResponse == "Add employee") {
       const departmentData = orm.getDepartments();
       departmentData.then(async function (result) {
         // console.log("Received table data...", result);
@@ -194,7 +199,6 @@ async function initialize() {
         result.map((el) => managerChoices.push(el.first_name));
       });
       const addEmp = await addEmployeePrompt();
-
       const manId = await getManagerId(addEmp.manager);
       const getDepartment = await orm.getDepartmentId(addEmp.role);
       // console.log("GET DEPARTMENT: ", getDepartment);
@@ -207,7 +211,9 @@ async function initialize() {
       );
       console.log("Added Employee!");
       initialize();
-    } else if (initResp.initResponse == "Remove employee") {
+    }
+    // Remove Employee
+    else if (initResp.initResponse == "Remove employee") {
       const remEmp = await removeEmployeePrompt();
       const getEmp = await orm.getEmployee(remEmp.employeeId);
       const secondRemEmp = await removeEmployeePrompt2(getEmp);
