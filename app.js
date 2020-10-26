@@ -164,6 +164,50 @@ function removeEmployeePrompt2(employee) {
   ]);
 }
 
+function updateRolePrompt(getEmp) {
+  console.log("Update Role:");
+  const empList = getEmp.map((el) => el.first_name);
+  console.log("EMP LIST:", empList);
+  return inquirer.prompt([
+    {
+      type: "checkbox",
+      message: `Which employee role do you want to update?`,
+      name: "updateRole",
+      choices: empList,
+    },
+  ]);
+}
+
+function updateRolePrompt2(promptData, roleData) {
+  return inquirer.prompt([
+    {
+      type: "checkbox",
+      message: `What do you want ${promptData.updateRole}'s role to be?`,
+      name: "roleChoices",
+      choices: roleData,
+    },
+  ]);
+}
+
+function updateManPrompt(empData, manData) {
+  const empList = empData.map((el) => el.first_name);
+  // const manList = manData.map((el) => el.first_name);
+  console.log("EMP LIST: ", empList, "MAN LIST: ", manData);
+  return inquirer.prompt([
+    {
+      type: "checkbox",
+      message: `Which employee do you want to change manager?`,
+      name: "empChoices",
+      choices: empList,
+    },
+    {
+      type: "checkbox",
+      message: `Who do you want their manager to be?`,
+      name: "manChoices",
+      choices: manData,
+    },
+  ]);
+}
 async function initialize() {
   try {
     const initResp = await initialPrompt();
@@ -223,6 +267,43 @@ async function initialize() {
       } else {
         initialize();
       }
+    }
+    // Update employee role
+    else if (initResp.initResponse == "Update employee role") {
+      const getEmp = await orm.getEmployee();
+      const getRole = await orm.getRole();
+      const getRoleData = getRole.map((el) => el.title);
+      const updateRoleEmp = await updateRolePrompt(getEmp);
+      const secondRoleEmp = await updateRolePrompt2(updateRoleEmp, getRoleData);
+      // console.log("role choice: ", secondRoleEmp.roleChoices);
+      const roleId = getRole.filter(
+        (el) => el.title == secondRoleEmp.roleChoices
+      );
+      // console.log("emp choice: ", updateRoleEmp.updateRole);
+      const empId = getEmp.filter(
+        (el) => el.first_name == updateRoleEmp.updateRole
+      );
+      // console.log("EMP ID: ", empId, "ROLE ID: ", roleId);
+      const changeRole = await orm.updateRole(roleId[0].id, empId[0].id);
+      // console.log("CHANGE ROLE: ", changeRole);
+    }
+    //Update employee manager
+    else if (initResp.initResponse == "Update employee manager") {
+      const getEmp = await orm.getEmployee();
+      const getMan = await orm.getManager();
+      console.log("GET MANAGER: ", getMan);
+      const getManData = getMan.map((el) => el.first_name);
+      const updateEmpMan = await updateManPrompt(getEmp, getManData);
+      console.log(updateEmpMan.manChoices, updateEmpMan.empChoices);
+      const empId = getEmp.filter(
+        (el) => el.first_name == updateEmpMan.empChoices
+      );
+      const manId = getMan.filter(
+        (el) => el.first_name == updateEmpMan.manChoices
+      );
+      console.log("EMP ID AND MAN ID:", empId, manId);
+      const updateManager = await orm.updateManager(manId[0].id, empId[0].id);
+      initialize();
     }
   } catch (error) {
     console.log(error);

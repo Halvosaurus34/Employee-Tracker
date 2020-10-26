@@ -87,6 +87,24 @@ function deleteEmployee(employeeId) {
   return db.query(sql, [employeeId]);
 }
 
+function getRole(roleId) {
+  const sql = `SELECT * FROM emprole ` + (roleId ? `WHERE id = ?` : "");
+  console.log("Sent role data...");
+  return db.query(sql, [roleId]);
+}
+
+function updateRole(roleId, empId) {
+  const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+  // console.log("Sent role data...", sql, roleId, empId);
+  return db.query(sql, [roleId, empId]);
+}
+
+function updateManager(manager, employee) {
+  const sql = `UPDATE employee SET manager_id = ? WHERE id = ?`;
+  // console.log("Sent role data...", sql, roleId, empId);
+  return db.query(sql, [manager, employee]);
+}
+
 function closeORM() {
   return db.close();
 }
@@ -101,5 +119,8 @@ module.exports = {
   addEmployee,
   getManagerId,
   getDepartmentId,
+  getRole,
+  updateRole,
+  updateManager,
   closeORM,
 };
