@@ -105,6 +105,18 @@ function updateManager(manager, employee) {
   return db.query(sql, [manager, employee]);
 }
 
+function addRole(title, salary, dep_id) {
+  const sql = `INSERT INTO empRole (title, salary, department_id) VALUES (?, ?, ?)`;
+  // console.log("ADDED EMPLOYEE");
+  return db.query(sql, [title, salary, dep_id]);
+}
+
+function deleteRole(roleId) {
+  const sql = `DELETE FROM empRole WHERE id=?`;
+  console.log("Deleted Role!");
+  return db.query(sql, [roleId]);
+}
+
 function closeORM() {
   return db.close();
 }
@@ -122,5 +134,7 @@ module.exports = {
   getRole,
   updateRole,
   updateManager,
+  addRole,
+  deleteRole,
   closeORM,
 };

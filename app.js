@@ -9,7 +9,7 @@ const orm = require("./app/orm");
 //starts main prompt for team member
 let departmentChoices = [];
 let managerChoices = [];
-
+let roleChoices = [];
 function initialPrompt() {
   return inquirer.prompt([
     {
@@ -208,16 +208,46 @@ function updateManPrompt(empData, manData) {
     },
   ]);
 }
+
+function addRolePrompt(empData, manData) {
+  return inquirer.prompt([
+    {
+      type: "input",
+      message: "What is the new role called?",
+      name: "roleName",
+    },
+    {
+      type: "input",
+      message: "What is the salary for this role?",
+      name: "roleSalary",
+    },
+    {
+      type: "checkbox",
+      message: "What department does this role belong to?",
+      name: "roleDepId",
+      choices: departmentChoices,
+    },
+  ]);
+}
+
+function removeRolePrompt(empData, manData) {
+  return inquirer.prompt([
+    {
+      type: "checkbox",
+      message: "Which role do you want to delete?",
+      name: "remRole",
+      choices: roleChoices,
+    },
+  ]);
+}
+
 async function initialize() {
   try {
     const initResp = await initialPrompt();
     // View all
     if (initResp.initResponse == "View all employees") {
-      const data = orm.getEmployee();
-      data.then(function (result) {
-        // console.log("Received table data...", result);
-        console.table(result);
-      });
+      const data = await orm.getEmployee();
+      console.table(data);
       initialize();
     }
     // View by departmnet
@@ -232,16 +262,11 @@ async function initialize() {
     }
     // Add Employee
     else if (initResp.initResponse == "Add employee") {
-      const departmentData = orm.getDepartments();
-      departmentData.then(async function (result) {
-        // console.log("Received table data...", result);
-        result.map((el) => departmentChoices.push(el.name));
-      });
-      const managerData = orm.getManager();
-      managerData.then(async function (result) {
-        // console.log("Received table data...", result);
-        result.map((el) => managerChoices.push(el.first_name));
-      });
+      const departmentData = await orm.getDepartments();
+      departmentData.map((el) => departmentChoices.push(el.name));
+      const managerData = await orm.getManager();
+      // console.log(managerData);
+      managerData.map((el) => managerChoices.push(el.first_name));
       const addEmp = await addEmployeePrompt();
       const manId = await getManagerId(addEmp.manager);
       const getDepartment = await orm.getDepartmentId(addEmp.role);
@@ -304,6 +329,55 @@ async function initialize() {
       console.log("EMP ID AND MAN ID:", empId, manId);
       const updateManager = await orm.updateManager(manId[0].id, empId[0].id);
       initialize();
+    }
+    // View all roles
+    if (initResp.initResponse == "View all roles") {
+      const data = await orm.getRole();
+      console.table(data);
+      initialize();
+    }
+    // Add role
+    else if (initResp.initResponse == "Add role") {
+      departmentChoices = [];
+      const departmentData = await orm.getDepartments();
+      departmentData.map((el) => departmentChoices.push(el.name));
+      const addRoleProm = await addRolePrompt();
+      const depId = departmentData.filter(
+        (el) => el.name == addRoleProm.roleDepId
+      );
+
+      // console.log("GET DEPARTMENT: ", getDepartment);
+      // console.log("MANID: ", manId);
+      const addRole = await orm.addRole(
+        addRoleProm.roleName,
+        addRoleProm.roleSalary,
+        depId[0].id
+      );
+      console.log(
+        "Added Role!",
+        addRoleProm.roleName,
+        addRoleProm.roleSalary,
+        depId[0].id
+      );
+      initialize();
+    }
+    //remove role
+    else if (initResp.initResponse == "Remove role") {
+      const roleData = await orm.getRole();
+      roleData.map((el) => roleChoices.push(el.title));
+      // console.log("ROLEDATA: ", roleData);
+      const remRole = await removeRolePrompt();
+      const roleId = roleData.filter((el) => el.title == remRole.remRole);
+      console.log("ROLE ID", roleId[0].id);
+      await orm.deleteRole(roleId[0].id);
+      // console.log("GET DEPARTMENT: ", getDepartment);
+      console.log("Removed Role...");
+      initialize();
+    }
+    //view all managers
+    else if (initResp.initResponse == "View all managers") {
+      const manData = await orm.getManager();
+      console.table(manData);
     }
   } catch (error) {
     console.log(error);
