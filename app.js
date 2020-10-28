@@ -10,6 +10,7 @@ const orm = require("./app/orm");
 let departmentChoices = [];
 let managerChoices = [];
 let roleChoices = [];
+let employeeChoices = [];
 function initialPrompt() {
   return inquirer.prompt([
     {
@@ -145,9 +146,10 @@ async function getManagerId(firstName) {
 function removeEmployeePrompt() {
   return inquirer.prompt([
     {
-      type: "input",
-      message: "What is the id number of the employee you want to remove?",
-      name: "employeeId",
+      type: "checkbox",
+      message: "What is the name of the employee you want to remove?",
+      name: "employeeName",
+      choices: employeeChoices,
     },
   ]);
 }
@@ -252,16 +254,20 @@ async function initialize() {
     }
     // View by departmnet
     else if (initResp.initResponse == "View employee by department") {
-      const getDep = await getDepartments();
+      await getDepartments();
       // console.log("DEPARTMENT PROMPT RESULT: ", depRes);
+      initialize();
     }
     // View by manager
     else if (initResp.initResponse == "View employee by manager") {
-      const getDep = await getManager();
+      await getManager();
       // console.log("DEPARTMENT PROMPT RESULT: ", manRes);
+      initialize();
     }
     // Add Employee
     else if (initResp.initResponse == "Add employee") {
+      departmentChoices = [];
+      managerChoices = [];
       const departmentData = await orm.getDepartments();
       departmentData.map((el) => departmentChoices.push(el.name));
       const managerData = await orm.getManager();
@@ -283,11 +289,16 @@ async function initialize() {
     }
     // Remove Employee
     else if (initResp.initResponse == "Remove employee") {
+      employeeChoices = [];
+      const empData = await orm.getEmployee();
+      empData.map((el) => employeeChoices.push(el.first_name));
       const remEmp = await removeEmployeePrompt();
-      const getEmp = await orm.getEmployee(remEmp.employeeId);
-      const secondRemEmp = await removeEmployeePrompt2(getEmp);
+      const empId = empData.filter(
+        (el) => el.first_name == remEmp.employeeName
+      );
+      const secondRemEmp = await removeEmployeePrompt2(empId);
       if (secondRemEmp.areYouSure == "Yes") {
-        const delEmp = await orm.deleteEmployee(getEmp[0].id);
+        const delEmp = await orm.deleteEmployee(empId[0].id);
         initialize();
       } else {
         initialize();
@@ -311,22 +322,23 @@ async function initialize() {
       // console.log("EMP ID: ", empId, "ROLE ID: ", roleId);
       const changeRole = await orm.updateRole(roleId[0].id, empId[0].id);
       // console.log("CHANGE ROLE: ", changeRole);
+      ititialize();
     }
     //Update employee manager
     else if (initResp.initResponse == "Update employee manager") {
       const getEmp = await orm.getEmployee();
       const getMan = await orm.getManager();
-      console.log("GET MANAGER: ", getMan);
+      // console.log("GET MANAGER: ", getMan);
       const getManData = getMan.map((el) => el.first_name);
       const updateEmpMan = await updateManPrompt(getEmp, getManData);
-      console.log(updateEmpMan.manChoices, updateEmpMan.empChoices);
+      // console.log(updateEmpMan.manChoices, updateEmpMan.empChoices);
       const empId = getEmp.filter(
         (el) => el.first_name == updateEmpMan.empChoices
       );
       const manId = getMan.filter(
         (el) => el.first_name == updateEmpMan.manChoices
       );
-      console.log("EMP ID AND MAN ID:", empId, manId);
+      // console.log("EMP ID AND MAN ID:", empId, manId);
       const updateManager = await orm.updateManager(manId[0].id, empId[0].id);
       initialize();
     }
@@ -353,31 +365,33 @@ async function initialize() {
         addRoleProm.roleSalary,
         depId[0].id
       );
-      console.log(
-        "Added Role!",
-        addRoleProm.roleName,
-        addRoleProm.roleSalary,
-        depId[0].id
-      );
+      // // console.log(
+      //   "Added Role!",
+      //   addRoleProm.roleName,
+      //   addRoleProm.roleSalary,
+      //   depId[0].id
+      // );
       initialize();
     }
     //remove role
     else if (initResp.initResponse == "Remove role") {
+      roleChoices = [];
       const roleData = await orm.getRole();
       roleData.map((el) => roleChoices.push(el.title));
       // console.log("ROLEDATA: ", roleData);
       const remRole = await removeRolePrompt();
       const roleId = roleData.filter((el) => el.title == remRole.remRole);
-      console.log("ROLE ID", roleId[0].id);
+      // console.log("ROLE ID", roleId[0].id);
       await orm.deleteRole(roleId[0].id);
       // console.log("GET DEPARTMENT: ", getDepartment);
-      console.log("Removed Role...");
+      // console.log("Removed Role...");
       initialize();
     }
     //view all managers
     else if (initResp.initResponse == "View all managers") {
       const manData = await orm.getManager();
-      console.table(manData);
+      // console.table(manData);
+      initialize();
     }
   } catch (error) {
     console.log(error);
