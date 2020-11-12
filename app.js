@@ -69,28 +69,27 @@ function departmentPrompt() {
   ]);
 }
 
-function getManager() {
-  const data = orm.getManager();
-  data.then(async function (result) {
-    // console.log("Received table data...", result);
+async function getManager() {
+  const data = await orm.getManager();
+  const empData = await orm.getEmployee();
 
-    result.map((el) => managerChoices.push(el.first_name));
-    console.log("MANAGER CHOICES ARRAY: ", departmentChoices);
-    console.log("GETMANAGERS RESULT: ", result);
-    const manRes = await managerPrompt();
-    managerChoices = [];
-    for (let i = 0; i < result.length; i++) {
-      if (manRes.managerSearch == result[i].first_name) {
-        console.log("FOUND TABLE RESULT: ", result[i].name);
-        let employeeSearch = orm.getEmployeeByManager(result[i].id);
-        employeeSearch.then(function (result) {
-          // console.log("Received table data...", result);
-          console.table(result);
-          initialize();
-        });
-      }
-    }
-  });
+  // console.log("Received table data...", result);
+  managerChoices = [];
+  employeeChoices = [];
+  data.map((el) => managerChoices.push(el.first_name));
+  empData.map((el) => employeeChoices.push(el.first_name));
+
+  // console.log("MANAGER CHOICES ARRAY: ", departmentChoices);
+  // console.log("GETMANAGERS RESULT: ", result);
+  const manRes = await managerPrompt();
+  // console.log("!!!!!!!!!!!!!!!!!!!", manRes.managerSearch);
+  const manId = data.filter((el) => el.first_name == manRes.managerSearch);
+  const empId = data.filter((el) => el.manager_id == manId[0].id);
+  // console.log("Manager ID: ", empId);
+  // console.log("FOUND TABLE RESULT: ", result[i].name);
+  let employeeSearch = await orm.getEmployeeByManager(manId[0].id);
+  // console.log("Received table data...", employeeSearch);
+  console.table(employeeSearch);
 }
 
 function managerPrompt() {
@@ -155,7 +154,7 @@ function removeEmployeePrompt() {
 }
 
 function removeEmployeePrompt2(employee) {
-  console.log("REMOVEEMPLOYEE: ", employee);
+  // console.log("REMOVEEMPLOYEE: ", employee);
   return inquirer.prompt([
     {
       type: "checkbox",
@@ -167,9 +166,9 @@ function removeEmployeePrompt2(employee) {
 }
 
 function updateRolePrompt(getEmp) {
-  console.log("Update Role:");
+  // console.log("Update Role:");
   const empList = getEmp.map((el) => el.first_name);
-  console.log("EMP LIST:", empList);
+  // console.log("EMP LIST:", empList);
   return inquirer.prompt([
     {
       type: "checkbox",
@@ -194,7 +193,7 @@ function updateRolePrompt2(promptData, roleData) {
 function updateManPrompt(empData, manData) {
   const empList = empData.map((el) => el.first_name);
   // const manList = manData.map((el) => el.first_name);
-  console.log("EMP LIST: ", empList, "MAN LIST: ", manData);
+  // console.log("EMP LIST: ", empList, "MAN LIST: ", manData);
   return inquirer.prompt([
     {
       type: "checkbox",
@@ -254,14 +253,16 @@ async function initialize() {
     }
     // View by departmnet
     else if (initResp.initResponse == "View employee by department") {
-      await getDepartments();
+      const depData = await orm.getDepartments();
       // console.log("DEPARTMENT PROMPT RESULT: ", depRes);
+      console.table(depData)
       initialize();
     }
     // View by manager
     else if (initResp.initResponse == "View employee by manager") {
-      await getManager();
+      const manData = await getManager();
       // console.log("DEPARTMENT PROMPT RESULT: ", manRes);
+      console.table(manData)
       initialize();
     }
     // Add Employee
@@ -322,7 +323,7 @@ async function initialize() {
       // console.log("EMP ID: ", empId, "ROLE ID: ", roleId);
       const changeRole = await orm.updateRole(roleId[0].id, empId[0].id);
       // console.log("CHANGE ROLE: ", changeRole);
-      ititialize();
+      initialize();
     }
     //Update employee manager
     else if (initResp.initResponse == "Update employee manager") {
@@ -390,7 +391,7 @@ async function initialize() {
     //view all managers
     else if (initResp.initResponse == "View all managers") {
       const manData = await orm.getManager();
-      // console.table(manData);
+      console.table(manData);
       initialize();
     }
   } catch (error) {

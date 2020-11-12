@@ -23,7 +23,8 @@
   "dependencies": {
     "console.table": "^0.10.0",
     "inquirer": "^6.3.1",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "start": "^5.1.0"
   },
   "devDependencies": {
     "jest": "^24.8.0"
