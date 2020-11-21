@@ -1,10 +1,11 @@
--- create database employee_db;
+create database employee_db;
+
 use employee_db;
 
--- CREATE TABLE department (
---   id INT NOT NULL primary key,
---   name VARCHAR(30) NULL
--- );
+CREATE TABLE department (
+  id INT NOT NULL primary key,
+  name VARCHAR(30) NULL
+);
 
 CREATE TABLE empRole (
 	id INT NOT NULL auto_increment primary key,
@@ -20,5 +21,3 @@ CREATE TABLE employee (
 	role_id INT NULL,
 	manager_id INT NULL
 );
-
-
